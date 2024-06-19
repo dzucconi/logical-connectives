@@ -1,0 +1,29 @@
+$font-size: 6;
+
+*,
+*:after,
+*:before {
+  box-sizing: border-box;
+  cursor: none;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  font-family: "Arial Unicode MS", sans-serif;
+  padding: 0.125em 0.25em;
+  line-height: 1.125;
+  user-select: none;
+  font-size: min(#{$font-size}vw, #{$font-size}vh);
+}
+
+.true {
+  color: cyan;
+  background-color: red;
+}
+
+.false {
+  color: red;
+  background-color: cyan;
+}
