@@ -18,7 +18,7 @@ const statement = () => {
   );
 };
 
-const recurse = (depth: number) => {
+const recurse = (depth: number): Statement => {
   if (depth === 0) {
     return statement();
   }
@@ -30,13 +30,36 @@ const recurse = (depth: number) => {
   );
 };
 
+const fitToScreen = () => {
+  let min = 1;
+  let max = Math.min(window.innerWidth, window.innerHeight);
+
+  while (max - min > 0.5) {
+    const mid = (min + max) / 2;
+    document.body.style.fontSize = `${mid}px`;
+
+    if (
+      document.body.scrollWidth > window.innerWidth ||
+      document.body.scrollHeight > window.innerHeight
+    ) {
+      max = mid;
+    } else {
+      min = mid;
+    }
+  }
+
+  document.body.style.fontSize = `${min}px`;
+};
+
 const init = () => {
   const s = recurse(4);
   document.body.className = "";
-  document.body.classList.add(s.value);
+  document.body.classList.add(String(s.value));
   ROOT.innerHTML = s.toString();
+  fitToScreen();
 };
 
 init();
 
 document.addEventListener("click", init);
+window.addEventListener("resize", fitToScreen);

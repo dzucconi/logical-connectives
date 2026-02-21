@@ -1,13 +1,17 @@
-$font-size: 6;
-
 *,
 *:after,
 *:before {
   box-sizing: border-box;
   cursor: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-html,
+html {
+  height: 100%;
+  overflow: hidden;
+}
+
 body {
   height: 100%;
   margin: 0;
@@ -15,7 +19,6 @@ body {
   padding: 0.125em 0.25em;
   line-height: 1.125;
   user-select: none;
-  font-size: min(#{$font-size}vw, #{$font-size}vh);
 }
 
 .true {
