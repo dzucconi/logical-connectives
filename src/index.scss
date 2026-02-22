@@ -1,3 +1,19 @@
+@font-face {
+  font-family: "LogicSymbols";
+  src: url("https://fonts.gstatic.com/s/notosansmath/v18/7Aump_cpkSecTWaHRlH2hyV5UEl981wa8-W1_nE.woff2")
+    format("woff2");
+  unicode-range: U+2190, U+2192, U+219B, U+2227-2228, U+2261, U+2295;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "LogicSymbols";
+  src: url("https://fonts.gstatic.com/s/notosansmath/v18/7Aump_cpkSecTWaHRlH2hyV5UEkB81wa8-W1.woff2")
+    format("woff2");
+  unicode-range: U+00AC, U+2191, U+2193;
+  font-display: swap;
+}
+
 *,
 *:after,
 *:before {
@@ -15,10 +31,13 @@ html {
 body {
   height: 100%;
   margin: 0;
-  font-family: "Arial Unicode MS", sans-serif;
-  padding: 0.125em 0.25em;
+  padding: 0.25em 1em;
+  font-family: "LogicSymbols", "Helvetica Neue", Helvetica, Arial, sans-serif;
   line-height: 1.125;
   user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .true {
