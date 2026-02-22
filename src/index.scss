@@ -1,21 +1,42 @@
-$font-size: 6;
+@font-face {
+  font-family: "LogicSymbols";
+  src: url("https://fonts.gstatic.com/s/notosansmath/v18/7Aump_cpkSecTWaHRlH2hyV5UEl981wa8-W1_nE.woff2")
+    format("woff2");
+  unicode-range: U+2190, U+2192, U+219B, U+2227-2228, U+2261, U+2295;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "LogicSymbols";
+  src: url("https://fonts.gstatic.com/s/notosansmath/v18/7Aump_cpkSecTWaHRlH2hyV5UEkB81wa8-W1.woff2")
+    format("woff2");
+  unicode-range: U+00AC, U+2191, U+2193;
+  font-display: swap;
+}
 
 *,
 *:after,
 *:before {
   box-sizing: border-box;
-  cursor: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-html,
+html {
+  height: 100%;
+  overflow: hidden;
+}
+
 body {
   height: 100%;
   margin: 0;
-  font-family: "Arial Unicode MS", sans-serif;
-  padding: 0.125em 0.25em;
+  padding: 0.25em 1em;
+  font-family: "LogicSymbols", "Helvetica Neue", Helvetica, Arial, sans-serif;
   line-height: 1.125;
   user-select: none;
-  font-size: min(#{$font-size}vw, #{$font-size}vh);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .true {
@@ -26,4 +47,39 @@ body {
 .false {
   color: red;
   background-color: cyan;
+}
+
+.sound-toggle {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 10;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 1.65rem;
+  line-height: 1;
+  opacity: 0.9;
+  cursor: pointer;
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+
+.sound-toggle[data-state="on"] {
+  opacity: 0.95;
+}
+
+.sound-toggle:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+body.idle-ui,
+body.idle-ui * {
+  cursor: none;
+}
+
+body.idle-ui .sound-toggle[data-state="on"] {
+  opacity: 0;
+  transform: scale(0.92);
 }

@@ -1,42 +1,37 @@
-import { Statement, Bool, CONNECTIVES, Operator } from "./lib/connectives";
+import { createTransitionAudio } from "./app/audio";
+import { UI_IDLE_MS } from "./app/config";
+import { createEngine } from "./app/engine";
+import { createTempo } from "./app/tempo";
+import { createUi } from "./app/ui";
+import { createViewport } from "./app/viewport";
 
 const ROOT = document.getElementById("root");
-
 if (!ROOT) {
   throw new Error("Root element not found");
 }
 
-const flip = () => Math.random() > 0.5;
+const viewport = createViewport(ROOT);
+const audio = createTransitionAudio();
+const tempo = createTempo();
+const engine = createEngine({ viewport, tempo, audio });
+const ui = createUi({ audio, idleMs: UI_IDLE_MS });
+engine.start();
 
-const sample = <T>(xs: T[]): T => xs[Math.floor(Math.random() * xs.length)];
+document.addEventListener("click", () => {
+  ui.handleGlobalClick();
+  engine.click();
+});
+window.addEventListener("pointermove", ui.handleActivity);
+window.addEventListener("pointerdown", ui.handleActivity);
+window.addEventListener("keydown", ui.handleActivity);
+window.addEventListener("resize", () => {
+  engine.resize();
+});
 
-const statement = () => {
-  return new Statement(
-    new Bool(flip(), flip()),
-    sample(Object.keys(CONNECTIVES)) as Operator,
-    new Bool(flip(), flip())
-  );
-};
-
-const recurse = (depth: number) => {
-  if (depth === 0) {
-    return statement();
+document.addEventListener("dblclick", () => {
+  if (document.fullscreenElement) {
+    void document.exitFullscreen();
+    return;
   }
-
-  return new Statement(
-    recurse(depth - 1),
-    sample(Object.keys(CONNECTIVES)) as Operator,
-    recurse(depth - 1)
-  );
-};
-
-const init = () => {
-  const s = recurse(4);
-  document.body.className = "";
-  document.body.classList.add(s.value);
-  ROOT.innerHTML = s.toString();
-};
-
-init();
-
-document.addEventListener("click", init);
+  void document.documentElement.requestFullscreen();
+});
