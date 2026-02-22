@@ -5,6 +5,8 @@ import {
   SFX_FALSE_DURATION_S,
   SFX_FALSE_END_HZ,
   SFX_FALSE_START_HZ,
+  SFX_MAIN_PRESET,
+  SFX_MICRO_PRESET,
   SFX_MASTER_GAIN,
   SFX_MICRO_DETUNE_CENTS,
   SFX_MICRO_DURATION_S,
@@ -90,52 +92,124 @@ export const createTransitionAudio = () => {
   };
 
   const playTransition = (isTrue: boolean) => {
-    if (isTrue) {
+    const classic = () => {
+      if (isTrue) {
+        playSweep(
+          SFX_TRUE_START_HZ,
+          SFX_TRUE_END_HZ,
+          SFX_TRUE_DURATION_S,
+          "triangle",
+          SFX_DETUNE_CENTS
+        );
+        playSweep(
+          SFX_TRUE_START_HZ * 1.5,
+          SFX_TRUE_END_HZ * 1.5,
+          SFX_TRUE_DURATION_S,
+          "sine"
+        );
+        return;
+      }
+
       playSweep(
-        SFX_TRUE_START_HZ,
-        SFX_TRUE_END_HZ,
-        SFX_TRUE_DURATION_S,
-        "triangle",
-        SFX_DETUNE_CENTS
+        SFX_FALSE_START_HZ,
+        SFX_FALSE_END_HZ,
+        SFX_FALSE_DURATION_S,
+        "sawtooth",
+        -SFX_DETUNE_CENTS
       );
       playSweep(
-        SFX_TRUE_START_HZ * 1.5,
-        SFX_TRUE_END_HZ * 1.5,
-        SFX_TRUE_DURATION_S,
-        "sine"
+        SFX_FALSE_START_HZ * 1.33,
+        SFX_FALSE_END_HZ * 1.2,
+        SFX_FALSE_DURATION_S,
+        "square"
       );
+    };
+
+    const chime = () => {
+      if (isTrue) {
+        playSweep(660, 990, 0.085, "sine", 0, 0.9);
+        playSweep(825, 1320, 0.11, "triangle", 0, 0.65);
+        return;
+      }
+
+      playSweep(390, 246, 0.16, "triangle", -6, 0.9);
+      playSweep(292, 146, 0.17, "sine", -10, 0.6);
+    };
+
+    const arcade = () => {
+      if (isTrue) {
+        playSweep(740, 880, 0.06, "square", 5, 0.95);
+        playSweep(880, 1320, 0.075, "square", 2, 0.7);
+        return;
+      }
+
+      playSweep(260, 170, 0.09, "square", -5, 0.95);
+      playSweep(170, 95, 0.11, "sawtooth", -12, 0.75);
+    };
+
+    if (SFX_MAIN_PRESET === "chime") {
+      chime();
       return;
     }
-
-    playSweep(
-      SFX_FALSE_START_HZ,
-      SFX_FALSE_END_HZ,
-      SFX_FALSE_DURATION_S,
-      "sawtooth",
-      -SFX_DETUNE_CENTS
-    );
-    playSweep(
-      SFX_FALSE_START_HZ * 1.33,
-      SFX_FALSE_END_HZ * 1.2,
-      SFX_FALSE_DURATION_S,
-      "square"
-    );
+    if (SFX_MAIN_PRESET === "arcade") {
+      arcade();
+      return;
+    }
+    classic();
   };
 
   const playMicro = (isTrue: boolean) => {
     const baseHz = isTrue ? SFX_MICRO_TRUE_HZ : SFX_MICRO_FALSE_HZ;
     const variance = (Math.random() * 2 - 1) * SFX_MICRO_VARIANCE_HZ;
-    const startHz = Math.max(40, baseHz + variance);
-    const endHz = Math.max(40, startHz * (isTrue ? 1.02 : 0.98));
 
-    playSweep(
-      startHz,
-      endHz,
-      SFX_MICRO_DURATION_S,
-      "sine",
-      isTrue ? SFX_MICRO_DETUNE_CENTS : -SFX_MICRO_DETUNE_CENTS,
-      SFX_MICRO_GAIN_MULTIPLIER
-    );
+    const classic = () => {
+      const startHz = Math.max(40, baseHz + variance);
+      const endHz = Math.max(40, startHz * (isTrue ? 1.02 : 0.98));
+      playSweep(
+        startHz,
+        endHz,
+        SFX_MICRO_DURATION_S,
+        "sine",
+        isTrue ? SFX_MICRO_DETUNE_CENTS : -SFX_MICRO_DETUNE_CENTS,
+        SFX_MICRO_GAIN_MULTIPLIER
+      );
+    };
+
+    const chime = () => {
+      const startHz = Math.max(40, baseHz + variance * 0.8);
+      const endHz = Math.max(40, startHz * (isTrue ? 1.05 : 0.95));
+      playSweep(
+        startHz,
+        endHz,
+        SFX_MICRO_DURATION_S * 1.15,
+        "triangle",
+        isTrue ? SFX_MICRO_DETUNE_CENTS : -SFX_MICRO_DETUNE_CENTS,
+        SFX_MICRO_GAIN_MULTIPLIER * 0.95
+      );
+    };
+
+    const arcade = () => {
+      const startHz = Math.max(40, baseHz + variance * 1.2);
+      const endHz = Math.max(40, startHz * (isTrue ? 1.01 : 0.93));
+      playSweep(
+        startHz,
+        endHz,
+        SFX_MICRO_DURATION_S * 0.9,
+        "square",
+        isTrue ? SFX_MICRO_DETUNE_CENTS : -SFX_MICRO_DETUNE_CENTS,
+        SFX_MICRO_GAIN_MULTIPLIER * 1.1
+      );
+    };
+
+    if (SFX_MICRO_PRESET === "chime") {
+      chime();
+      return;
+    }
+    if (SFX_MICRO_PRESET === "arcade") {
+      arcade();
+      return;
+    }
+    classic();
   };
 
   return { unlock, setEnabled, getState, playTransition, playMicro };
