@@ -34,9 +34,20 @@ export type EngineController = {
   start: () => void;
   click: () => void;
   resize: () => void;
+  togglePause: () => boolean;
 };
 
 export const createEngine = ({ viewport, tempo, audio }: EngineDeps): EngineController => {
+  const pauseStateKey = "__logicalConnectivesPaused";
+  const getPaused = () => Boolean((globalThis as Record<string, unknown>)[pauseStateKey]);
+  const setPaused = (next: boolean) => {
+    (globalThis as Record<string, unknown>)[pauseStateKey] = next;
+  };
+
+  if ((globalThis as Record<string, unknown>)[pauseStateKey] === undefined) {
+    setPaused(false);
+  }
+
   let current = recurse(INITIAL_DEPTH);
   let targetDepth = INITIAL_DEPTH;
   let lastStep = 0;
@@ -117,7 +128,7 @@ export const createEngine = ({ viewport, tempo, audio }: EngineDeps): EngineCont
   };
 
   const animate = (timestamp: number) => {
-    if (timestamp - lastStep >= tempo.interval()) {
+    if (!getPaused() && timestamp - lastStep >= tempo.interval()) {
       step();
       tempo.update();
       lastStep = timestamp;
@@ -142,5 +153,11 @@ export const createEngine = ({ viewport, tempo, audio }: EngineDeps): EngineCont
     current = renderConstrained(current).next;
   };
 
-  return { start, click, resize };
+  const togglePause = () => {
+    const next = !getPaused();
+    setPaused(next);
+    return next;
+  };
+
+  return { start, click, resize, togglePause };
 };

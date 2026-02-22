@@ -49,6 +49,18 @@ body {
   background-color: cyan;
 }
 
+@supports (color: color(display-p3 1 0 0)) {
+  body.use-p3.true {
+    color: color(display-p3 0 1 1);
+    background-color: color(display-p3 1 0 0);
+  }
+
+  body.use-p3.false {
+    color: color(display-p3 1 0 0);
+    background-color: color(display-p3 0 1 1);
+  }
+}
+
 .sound-toggle {
   position: fixed;
   top: 1rem;

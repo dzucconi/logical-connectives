@@ -15,6 +15,7 @@ const audio = createTransitionAudio();
 const tempo = createTempo();
 const engine = createEngine({ viewport, tempo, audio });
 const ui = createUi({ audio, idleMs: UI_IDLE_MS });
+document.body.classList.add("use-p3");
 engine.start();
 
 document.addEventListener("click", () => {
@@ -23,7 +24,18 @@ document.addEventListener("click", () => {
 });
 window.addEventListener("pointermove", ui.handleActivity);
 window.addEventListener("pointerdown", ui.handleActivity);
-window.addEventListener("keydown", ui.handleActivity);
+document.addEventListener("keydown", (event) => {
+  ui.handleActivity();
+  if (event.repeat) {
+    return;
+  }
+
+  if (event.code === "Space") {
+    event.preventDefault();
+    const paused = engine.togglePause();
+    document.body.classList.toggle("paused", paused);
+  }
+});
 window.addEventListener("resize", () => {
   engine.resize();
 });
