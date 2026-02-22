@@ -32,6 +32,11 @@ if (!ROOT) {
 const viewport = createViewport(ROOT);
 const audio = createTransitionAudio();
 const tempo = createTempo();
+const IDLE_MS = 1800;
+const soundToggle = document.createElement("button");
+soundToggle.type = "button";
+soundToggle.className = "sound-toggle";
+document.body.appendChild(soundToggle);
 
 let current = recurse(INITIAL_DEPTH);
 let targetDepth = INITIAL_DEPTH;
@@ -40,6 +45,42 @@ let lastValue = current.value;
 let lastBackgroundValue = current.value;
 let lastStatementText = current.toString();
 let stepsSinceFlip = 0;
+let idleTimer: number | undefined;
+
+const renderSoundToggle = () => {
+  const state = audio.getState();
+  soundToggle.textContent = state.enabled ? "🔊" : "🔇";
+  soundToggle.setAttribute(
+    "aria-label",
+    state.enabled ? "Disable sound" : "Enable sound"
+  );
+  soundToggle.dataset.state = state.enabled ? "on" : "off";
+  soundToggle.disabled = !state.supported;
+};
+
+const clearIdleTimer = () => {
+  if (idleTimer) {
+    window.clearTimeout(idleTimer);
+    idleTimer = undefined;
+  }
+};
+
+const scheduleIdle = () => {
+  clearIdleTimer();
+  if (!audio.getState().enabled) {
+    document.body.classList.remove("idle-ui");
+    return;
+  }
+
+  idleTimer = window.setTimeout(() => {
+    document.body.classList.add("idle-ui");
+  }, IDLE_MS);
+};
+
+const wakeUi = () => {
+  document.body.classList.remove("idle-ui");
+  scheduleIdle();
+};
 
 const renderConstrained = (state: Statement) => {
   let next = state;
@@ -121,13 +162,28 @@ const animate = (timestamp: number) => {
 };
 
 current = renderConstrained(current).next;
+renderSoundToggle();
 requestAnimationFrame(animate);
 
 document.addEventListener("click", () => {
-  audio.unlock();
+  const state = audio.getState();
+  if (!state.enabled) {
+    audio.setEnabled(true);
+    renderSoundToggle();
+  }
   targetDepth = sample(CLICK_TARGET_DEPTH_OPTIONS);
+  wakeUi();
 });
-document.addEventListener("keydown", audio.unlock);
+soundToggle.addEventListener("click", (event) => {
+  event.stopPropagation();
+  const state = audio.getState();
+  audio.setEnabled(!state.enabled);
+  wakeUi();
+  renderSoundToggle();
+});
+window.addEventListener("pointermove", wakeUi);
+window.addEventListener("pointerdown", wakeUi);
+window.addEventListener("keydown", wakeUi);
 window.addEventListener("resize", () => {
   current = renderConstrained(current).next;
 });

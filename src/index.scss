@@ -18,7 +18,6 @@
 *:after,
 *:before {
   box-sizing: border-box;
-  cursor: none;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -48,4 +47,39 @@ body {
 .false {
   color: red;
   background-color: cyan;
+}
+
+.sound-toggle {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 10;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 1.65rem;
+  line-height: 1;
+  opacity: 0.9;
+  cursor: pointer;
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+
+.sound-toggle[data-state="on"] {
+  opacity: 0.95;
+}
+
+.sound-toggle:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+body.idle-ui,
+body.idle-ui * {
+  cursor: none;
+}
+
+body.idle-ui .sound-toggle[data-state="on"] {
+  opacity: 0;
+  transform: scale(0.92);
 }

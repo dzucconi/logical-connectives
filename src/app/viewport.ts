@@ -45,7 +45,7 @@ export const createViewport = (root: HTMLElement) => {
   const render = (state: Statement) => {
     root.textContent = state.toString();
     const fontSize = fitToScreen();
-    document.body.className = "";
+    document.body.classList.remove("true", "false");
     document.body.classList.add(String(state.value));
     return fontSize;
   };

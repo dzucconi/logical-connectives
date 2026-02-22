@@ -20,6 +20,7 @@ import {
 
 export const createTransitionAudio = () => {
   let audioContext: AudioContext | null = null;
+  let enabled = false;
 
   const getAudioContext = () => {
     if (!audioContext) {
@@ -38,6 +39,19 @@ export const createTransitionAudio = () => {
     }
   };
 
+  const setEnabled = (next: boolean) => {
+    enabled = next;
+    if (enabled) {
+      unlock();
+    }
+  };
+
+  const getState = () => ({
+    supported: SFX_ENABLED,
+    enabled,
+    running: audioContext?.state === "running",
+  });
+
   const playSweep = (
     startHz: number,
     endHz: number,
@@ -46,7 +60,7 @@ export const createTransitionAudio = () => {
     detuneCents = 0,
     gainScale = 1
   ) => {
-    if (!SFX_ENABLED) {
+    if (!SFX_ENABLED || !enabled) {
       return;
     }
 
@@ -124,5 +138,5 @@ export const createTransitionAudio = () => {
     );
   };
 
-  return { unlock, playTransition, playMicro };
+  return { unlock, setEnabled, getState, playTransition, playMicro };
 };
