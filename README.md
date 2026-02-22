@@ -6,6 +6,7 @@
 
 - **State**: production
 - **Production**:
+  - **URL**: https://logical-connectives.work.damonzucconi.com/
   - **URL**: https://damonzucconi-logical-connectives.netlify.app/
 - **Host**: https://app.netlify.com/projects/damonzucconi-logical-connectives/deploys
 - **Deploys**: Merged PRs to `main` are automatically deployed to production. [Manually trigger a deploy](https://app.netlify.com/projects/damonzucconi-logical-connectives/deploys)
