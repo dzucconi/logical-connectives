@@ -18,9 +18,19 @@ import {
   SFX_TRUE_DURATION_S,
   SFX_TRUE_END_HZ,
   SFX_TRUE_START_HZ,
+  type SfxMainPreset,
+  type SfxMicroPreset,
 } from "./config";
 
-export const createTransitionAudio = () => {
+export type TransitionAudio = {
+  unlock: () => void;
+  setEnabled: (next: boolean) => void;
+  getState: () => { supported: boolean; enabled: boolean; running: boolean };
+  playTransition: (isTrue: boolean) => void;
+  playMicro: (isTrue: boolean) => void;
+};
+
+export const createTransitionAudio = (): TransitionAudio => {
   let audioContext: AudioContext | null = null;
   let enabled = false;
 
@@ -91,8 +101,8 @@ export const createTransitionAudio = () => {
     osc.stop(now + durationS + SFX_RELEASE_S);
   };
 
-  const playTransition = (isTrue: boolean) => {
-    const classic = () => {
+  const mainPresetPlayers: Record<SfxMainPreset, (isTrue: boolean) => void> = {
+    classic: (isTrue) => {
       if (isTrue) {
         playSweep(
           SFX_TRUE_START_HZ,
@@ -123,9 +133,8 @@ export const createTransitionAudio = () => {
         SFX_FALSE_DURATION_S,
         "square"
       );
-    };
-
-    const chime = () => {
+    },
+    chime: (isTrue) => {
       if (isTrue) {
         playSweep(660, 990, 0.085, "sine", 0, 0.9);
         playSweep(825, 1320, 0.11, "triangle", 0, 0.65);
@@ -134,9 +143,8 @@ export const createTransitionAudio = () => {
 
       playSweep(390, 246, 0.16, "triangle", -6, 0.9);
       playSweep(292, 146, 0.17, "sine", -10, 0.6);
-    };
-
-    const arcade = () => {
+    },
+    arcade: (isTrue) => {
       if (isTrue) {
         playSweep(740, 880, 0.06, "square", 5, 0.95);
         playSweep(880, 1320, 0.075, "square", 2, 0.7);
@@ -145,24 +153,17 @@ export const createTransitionAudio = () => {
 
       playSweep(260, 170, 0.09, "square", -5, 0.95);
       playSweep(170, 95, 0.11, "sawtooth", -12, 0.75);
-    };
-
-    if (SFX_MAIN_PRESET === "chime") {
-      chime();
-      return;
-    }
-    if (SFX_MAIN_PRESET === "arcade") {
-      arcade();
-      return;
-    }
-    classic();
+    },
   };
 
-  const playMicro = (isTrue: boolean) => {
+  const playTransition = (isTrue: boolean) => {
+    mainPresetPlayers[SFX_MAIN_PRESET](isTrue);
+  };
+
+  const microPresetPlayers: Record<SfxMicroPreset, (isTrue: boolean) => void> = {
+    classic: (isTrue) => {
     const baseHz = isTrue ? SFX_MICRO_TRUE_HZ : SFX_MICRO_FALSE_HZ;
     const variance = (Math.random() * 2 - 1) * SFX_MICRO_VARIANCE_HZ;
-
-    const classic = () => {
       const startHz = Math.max(40, baseHz + variance);
       const endHz = Math.max(40, startHz * (isTrue ? 1.02 : 0.98));
       playSweep(
@@ -173,9 +174,10 @@ export const createTransitionAudio = () => {
         isTrue ? SFX_MICRO_DETUNE_CENTS : -SFX_MICRO_DETUNE_CENTS,
         SFX_MICRO_GAIN_MULTIPLIER
       );
-    };
-
-    const chime = () => {
+    },
+    chime: (isTrue) => {
+      const baseHz = isTrue ? SFX_MICRO_TRUE_HZ : SFX_MICRO_FALSE_HZ;
+      const variance = (Math.random() * 2 - 1) * SFX_MICRO_VARIANCE_HZ;
       const startHz = Math.max(40, baseHz + variance * 0.8);
       const endHz = Math.max(40, startHz * (isTrue ? 1.05 : 0.95));
       playSweep(
@@ -186,9 +188,10 @@ export const createTransitionAudio = () => {
         isTrue ? SFX_MICRO_DETUNE_CENTS : -SFX_MICRO_DETUNE_CENTS,
         SFX_MICRO_GAIN_MULTIPLIER * 0.95
       );
-    };
-
-    const arcade = () => {
+    },
+    arcade: (isTrue) => {
+      const baseHz = isTrue ? SFX_MICRO_TRUE_HZ : SFX_MICRO_FALSE_HZ;
+      const variance = (Math.random() * 2 - 1) * SFX_MICRO_VARIANCE_HZ;
       const startHz = Math.max(40, baseHz + variance * 1.2);
       const endHz = Math.max(40, startHz * (isTrue ? 1.01 : 0.93));
       playSweep(
@@ -199,17 +202,11 @@ export const createTransitionAudio = () => {
         isTrue ? SFX_MICRO_DETUNE_CENTS : -SFX_MICRO_DETUNE_CENTS,
         SFX_MICRO_GAIN_MULTIPLIER * 1.1
       );
-    };
+    },
+  };
 
-    if (SFX_MICRO_PRESET === "chime") {
-      chime();
-      return;
-    }
-    if (SFX_MICRO_PRESET === "arcade") {
-      arcade();
-      return;
-    }
-    classic();
+  const playMicro = (isTrue: boolean) => {
+    microPresetPlayers[SFX_MICRO_PRESET](isTrue);
   };
 
   return { unlock, setEnabled, getState, playTransition, playMicro };

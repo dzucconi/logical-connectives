@@ -1,7 +1,12 @@
 import { Statement } from "../lib/connectives";
 import { FIT_FONT_MIN_PX, FIT_FONT_TOLERANCE_PX } from "./config";
 
-export const createViewport = (root: HTMLElement) => {
+export type ViewportController = {
+  getFill: () => { width: number; height: number };
+  render: (state: Statement) => number;
+};
+
+export const createViewport = (root: HTMLElement): ViewportController => {
   const getAvailableSpace = () => {
     const style = getComputedStyle(document.body);
     return {

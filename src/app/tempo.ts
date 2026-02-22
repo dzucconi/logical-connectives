@@ -15,7 +15,12 @@ import {
 } from "./config";
 import { clamp, randomInt } from "./utils";
 
-export const createTempo = () => {
+export type TempoController = {
+  interval: () => number;
+  update: () => void;
+};
+
+export const createTempo = (): TempoController => {
   let stepIntervalMs = STEP_MS;
   let burstStepsLeft = 0;
   let lullStepsLeft = 0;
