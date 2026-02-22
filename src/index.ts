@@ -28,6 +28,18 @@ const TEMPO_LULL_LENGTH_MAX = 20;
 const HEIGHT_TARGET = 0.95;
 const FORCE_FLIP_AFTER_STEPS = 10;
 
+const SFX_ENABLED = true;
+const SFX_MASTER_GAIN = 0.05;
+const SFX_ATTACK_S = 0.005;
+const SFX_RELEASE_S = 0.14;
+const SFX_TRUE_START_HZ = 640;
+const SFX_TRUE_END_HZ = 960;
+const SFX_TRUE_DURATION_S = 0.11;
+const SFX_FALSE_START_HZ = 300;
+const SFX_FALSE_END_HZ = 120;
+const SFX_FALSE_DURATION_S = 0.16;
+const SFX_DETUNE_CENTS = 9;
+
 const INITIAL_DEPTH = 6;
 const CLICK_TARGET_DEPTH_OPTIONS = [5, 6, 7, 8] as const;
 const TARGET_DEPTH_NUDGE_CHOICES = [-1, 1] as const;
@@ -55,6 +67,89 @@ const randomInt = (min: number, max: number) =>
 const sample = <T>(xs: readonly T[]): T => xs[Math.floor(Math.random() * xs.length)];
 const operators = Object.keys(CONNECTIVES) as Operator[];
 const sampleOperator = () => sample(operators);
+let audioContext: AudioContext | null = null;
+
+const getAudioContext = () => {
+  if (!audioContext) {
+    audioContext = new AudioContext();
+  }
+  return audioContext;
+};
+
+const unlockAudio = () => {
+  if (!SFX_ENABLED) {
+    return;
+  }
+
+  const ctx = getAudioContext();
+  if (ctx.state === "suspended") {
+    void ctx.resume();
+  }
+};
+
+const playSweep = (
+  startHz: number,
+  endHz: number,
+  durationS: number,
+  type: OscillatorType,
+  detuneCents = 0
+) => {
+  if (!SFX_ENABLED) {
+    return;
+  }
+
+  const ctx = getAudioContext();
+  if (ctx.state !== "running") {
+    return;
+  }
+
+  const now = ctx.currentTime;
+  const gain = ctx.createGain();
+  const osc = ctx.createOscillator();
+
+  gain.gain.setValueAtTime(0, now);
+  gain.gain.linearRampToValueAtTime(SFX_MASTER_GAIN, now + SFX_ATTACK_S);
+  gain.gain.linearRampToValueAtTime(0, now + durationS + SFX_RELEASE_S);
+
+  osc.type = type;
+  osc.frequency.setValueAtTime(startHz, now);
+  osc.frequency.exponentialRampToValueAtTime(endHz, now + durationS);
+  osc.detune.setValueAtTime(detuneCents, now);
+
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+
+  osc.start(now);
+  osc.stop(now + durationS + SFX_RELEASE_S);
+};
+
+const playTransitionSound = (isTrue: boolean) => {
+  if (isTrue) {
+    playSweep(
+      SFX_TRUE_START_HZ,
+      SFX_TRUE_END_HZ,
+      SFX_TRUE_DURATION_S,
+      "triangle",
+      SFX_DETUNE_CENTS
+    );
+    playSweep(SFX_TRUE_START_HZ * 1.5, SFX_TRUE_END_HZ * 1.5, SFX_TRUE_DURATION_S, "sine");
+    return;
+  }
+
+  playSweep(
+    SFX_FALSE_START_HZ,
+    SFX_FALSE_END_HZ,
+    SFX_FALSE_DURATION_S,
+    "sawtooth",
+    -SFX_DETUNE_CENTS
+  );
+  playSweep(
+    SFX_FALSE_START_HZ * 1.33,
+    SFX_FALSE_END_HZ * 1.2,
+    SFX_FALSE_DURATION_S,
+    "square"
+  );
+};
 
 const statement = () => {
   return new Statement(
@@ -321,6 +416,7 @@ let current = recurse(INITIAL_DEPTH);
 let targetDepth = INITIAL_DEPTH;
 let lastStep = 0;
 let lastValue = current.value;
+let lastBackgroundValue = current.value;
 let stepsSinceFlip = 0;
 let stepIntervalMs = STEP_MS;
 let burstStepsLeft = 0;
@@ -363,6 +459,10 @@ const step = () => {
   }
 
   const fontSize = render(current);
+  if (current.value !== lastBackgroundValue) {
+    playTransitionSound(current.value);
+    lastBackgroundValue = current.value;
+  }
   nudgeTargetDepth(fontSize);
 };
 
@@ -414,8 +514,11 @@ current = constrainForViewport(current);
 requestAnimationFrame(animate);
 
 document.addEventListener("click", () => {
+  unlockAudio();
   targetDepth = sample(CLICK_TARGET_DEPTH_OPTIONS);
 });
+
+document.addEventListener("keydown", unlockAudio);
 
 window.addEventListener("resize", () => {
   current = constrainForViewport(current);
