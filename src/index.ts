@@ -187,3 +187,11 @@ window.addEventListener("keydown", wakeUi);
 window.addEventListener("resize", () => {
   current = renderConstrained(current).next;
 });
+
+document.addEventListener("dblclick", () => {
+  if (document.fullscreenElement) {
+    void document.exitFullscreen();
+    return;
+  }
+  void document.documentElement.requestFullscreen();
+});
