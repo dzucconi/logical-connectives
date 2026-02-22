@@ -6,6 +6,12 @@ import {
   SFX_FALSE_END_HZ,
   SFX_FALSE_START_HZ,
   SFX_MASTER_GAIN,
+  SFX_MICRO_DETUNE_CENTS,
+  SFX_MICRO_DURATION_S,
+  SFX_MICRO_FALSE_HZ,
+  SFX_MICRO_GAIN_MULTIPLIER,
+  SFX_MICRO_TRUE_HZ,
+  SFX_MICRO_VARIANCE_HZ,
   SFX_RELEASE_S,
   SFX_TRUE_DURATION_S,
   SFX_TRUE_END_HZ,
@@ -37,7 +43,8 @@ export const createTransitionAudio = () => {
     endHz: number,
     durationS: number,
     type: OscillatorType,
-    detuneCents = 0
+    detuneCents = 0,
+    gainScale = 1
   ) => {
     if (!SFX_ENABLED) {
       return;
@@ -53,7 +60,7 @@ export const createTransitionAudio = () => {
     const osc = ctx.createOscillator();
 
     gain.gain.setValueAtTime(0, now);
-    gain.gain.linearRampToValueAtTime(SFX_MASTER_GAIN, now + SFX_ATTACK_S);
+    gain.gain.linearRampToValueAtTime(SFX_MASTER_GAIN * gainScale, now + SFX_ATTACK_S);
     gain.gain.linearRampToValueAtTime(0, now + durationS + SFX_RELEASE_S);
 
     osc.type = type;
@@ -101,5 +108,21 @@ export const createTransitionAudio = () => {
     );
   };
 
-  return { unlock, playTransition };
+  const playMicro = (isTrue: boolean) => {
+    const baseHz = isTrue ? SFX_MICRO_TRUE_HZ : SFX_MICRO_FALSE_HZ;
+    const variance = (Math.random() * 2 - 1) * SFX_MICRO_VARIANCE_HZ;
+    const startHz = Math.max(40, baseHz + variance);
+    const endHz = Math.max(40, startHz * (isTrue ? 1.02 : 0.98));
+
+    playSweep(
+      startHz,
+      endHz,
+      SFX_MICRO_DURATION_S,
+      "sine",
+      isTrue ? SFX_MICRO_DETUNE_CENTS : -SFX_MICRO_DETUNE_CENTS,
+      SFX_MICRO_GAIN_MULTIPLIER
+    );
+  };
+
+  return { unlock, playTransition, playMicro };
 };

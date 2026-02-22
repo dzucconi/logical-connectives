@@ -38,6 +38,7 @@ let targetDepth = INITIAL_DEPTH;
 let lastStep = 0;
 let lastValue = current.value;
 let lastBackgroundValue = current.value;
+let lastStatementText = current.toString();
 let stepsSinceFlip = 0;
 
 const renderConstrained = (state: Statement) => {
@@ -95,10 +96,18 @@ const step = () => {
     lastValue = current.value;
   }
 
-  if (current.value !== lastBackgroundValue) {
+  const statementText = current.toString();
+  const didFlip = current.value !== lastBackgroundValue;
+  const didChangeStatement = statementText !== lastStatementText;
+
+  if (didFlip) {
     audio.playTransition(current.value);
     lastBackgroundValue = current.value;
+  } else if (didChangeStatement) {
+    audio.playMicro(current.value);
   }
+
+  lastStatementText = statementText;
   nudgeTargetDepth(frame.fontSize);
 };
 

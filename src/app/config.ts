@@ -32,6 +32,12 @@ export const SFX_FALSE_START_HZ = 300;
 export const SFX_FALSE_END_HZ = 120;
 export const SFX_FALSE_DURATION_S = 0.16;
 export const SFX_DETUNE_CENTS = 9;
+export const SFX_MICRO_DURATION_S = 0.045;
+export const SFX_MICRO_GAIN_MULTIPLIER = 0.32;
+export const SFX_MICRO_TRUE_HZ = 760;
+export const SFX_MICRO_FALSE_HZ = 220;
+export const SFX_MICRO_VARIANCE_HZ = 26;
+export const SFX_MICRO_DETUNE_CENTS = 3;
 
 export const INITIAL_DEPTH = 6;
 export const CLICK_TARGET_DEPTH_OPTIONS = [5, 6, 7, 8] as const;
