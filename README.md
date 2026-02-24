@@ -2,6 +2,8 @@
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/20e36adb-153e-42fe-b91e-b755d7d60c06/deploy-status)](https://app.netlify.com/projects/damonzucconi-logical-connectives/deploys)
 
+A continuously evolving logical statement fills the screen, built from boolean values (true/false), optional negation, and standard logical connectives. On each step, the expression mutates by changing operators or values, or by growing and shrinking recursive branches, then is re-evaluated to produce a current truth value. The background/text colors invert to indicate whether the overall result is true or false.
+
 ## Meta
 
 - **State**: production
